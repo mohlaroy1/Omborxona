@@ -1,12 +1,16 @@
 {% extends 'base.html' %}
 
+{% block title %}Mahsulotlar{% endblock %}
+{% block page_title %}Mahsulotlar{% endblock %}
+{% block products_active %}active{% endblock %}
+
 {% block content %}
 
     <div class="col-md-12">
         <div class="card card-dark">
             <div class="card-header border-0">
                 <div class="d-flex justify-content-between">
-                  <button type="submit" class="btn btn-primary" data-toggle="modal" data-target="#myModal">Maxsulot qo'shish</button>
+                  <button type="submit" class="btn btn-primary" data-toggle="modal" data-target="#myModal">Mahsulot qo'shish</button>
                 </div>
             </div>
             <div class="card-body">
@@ -32,7 +36,7 @@
                             <td>{{ product.amount }} {{ product.unit }}</td>
                             <td>{{ product.updated_at }}</td>
                             <td>
-                                <a href="#">
+                                <a href="{% url 'product-update' product.id %}">
                                     <button type="submit" class="btn btn-warning" data-toggle="modal">Tahrirlash</button>
                                 </a>
                                 <a href="#">

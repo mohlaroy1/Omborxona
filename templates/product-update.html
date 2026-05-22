@@ -1,27 +1,41 @@
+{% extends 'base.html' %}
+
+{% block title %}Mahsulotlar | Tahrirlash {% endblock %}
+{% block page_title %}Mahsulotlar{% endblock %}
+{% block products_active %}active{% endblock %}
+
+{% block content %}
+
 <!-- Modal body -->
-<form action="#" id="edit-product-form">
-    <label for="edit-product-name">Mahsulot nomi:</label>
-    <input type="text" name="name"  placeholder="Mahsulot nomi..." id="edit-product-name"
+<form id="edit-product-form" class="px-4" method="post">
+    {% csrf_token %}
+    <label for="name">Nomi: </label>
+    <input type="text" name="name" value="{{ product.name }}" placeholder="Mahsulot nomi..." id="name"
            class="form-control" required>
     <br>
-    <label for="edit-product-name">Brend nomi:</label>
-    <input type="text" name="brand_name" placeholder="Brend nomi..."
-           id="edit-product-brend" class="form-control" required>
+    <label for="brand">Brend nomi: </label>
+    <input type="text" name="brand" {% if product.brand %} value="{{ product.brand }}" {% endif %} placeholder="Brend nomi..."
+           id="brand" class="form-control">
     <br>
-    <label for="edit-product-name">Mahsulot narxi:</label>
-    <input type="number" name="price" placeholder="Mahsulot narxi..."
-           id="edit-product-price" class="form-control" required>
+    <label for="price">Narxi(so'm): </label>
+    <input type="number" name="price" value="{{ product.price }}" placeholder="Mahsulot narxi..."
+           id="price" class="form-control">
     <br>
-    <label for="edit-product-name">Dona qoldi:</label>
-    <input type="number" name="amount" placeholder="Dona qoldi..."
-           id="edit-product-amount" class="form-control" required>
+    <label for="amount">Miqdor({{ product.unit }}): </label>
+    <input type="number" name="amount" value="{{ product.amount }}" placeholder="Dona qoldi..."
+           id="amount" class="form-control">
+    <br>
+    <label for="unit">O'lchov birlik: </label>
+    <input type="text" name="unit" value="{{ product.unit }}" placeholder="kg, dona, litr,..."
+           id="unit" class="form-control">
     <br>
 
     <!-- Modal footer -->
     <button type="submit" class="btn btn-success">Yangilash</button>
-    <a href="#">
+    <a href="{% url 'products' %}">
         <button type="button" class="btn btn-danger" data-dismiss="modal">Yopish</button>
     </a>
 
 </form>
 
+{% endblock %}

@@ -1,7 +1,9 @@
+from django.contrib import messages
 from django.db.models import ExpressionWrapper, F, FloatField
-from django.shortcuts import render
+from django.shortcuts import render,get_object_or_404,redirect
 from django.views import View
 from django.views.generic import RedirectView
+from django.db import transaction
 
 from .models import *
 
@@ -39,3 +41,34 @@ class ProductsView(View):
             unit = request.POST.get('unit'),
         )
         return self.get(request)
+
+
+class ProductUpdateView(View):
+    def get(self, request, pk):
+        product = get_object_or_404(Product, id=pk)
+
+        context = {
+            'product': product,
+        }
+        return render(request, 'product-update.html', context)
+
+    def post(self, request, pk):
+        product = get_object_or_404(Product, id=pk)
+        try:
+            product.name = request.POST.get('name')
+            product.brand = request.POST.get('brand')
+            product.price = request.POST.get('price')
+            product.amount = request.POST.get('amount')
+            product.unit = request.POST.get('unit')
+            product.save()
+            messages.success(request, 'Ma\'lumotlar muvaffaqiyatli saqlandi!')
+        except Exception as e:
+            messages.warning(request, f"Ma\'lumotlari yangilanmadi. Qayta urining! Error: {e}")
+        return redirect('products')
+
+
+
+
+class ClientsView(View):
+    def get(self, request):
+        return render(request, 'clients.html')
