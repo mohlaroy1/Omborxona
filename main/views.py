@@ -67,6 +67,12 @@ class ProductUpdateView(View):
         return redirect('products')
 
 
+class ProductDeleteView(View):
+    def post(self, request, pk):
+        product = get_object_or_404(Product, id=pk)
+        product.delete()
+        messages.success(request, "Mahsulot o'chirildi!")
+        return redirect('products')
 
 
 class ClientsView(View):
