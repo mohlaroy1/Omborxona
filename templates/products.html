@@ -39,12 +39,10 @@
                                 <a href="{% url 'product-update' product.id %}">
                                     <button type="submit" class="btn btn-warning" data-toggle="modal">Tahrirlash</button>
                                 </a>
-                                <form method="post" action="{% url 'product-delete' product.id %}" style="display:inline;">
-                                    {% csrf_token %}
-                                    <button type="submit" class="btn btn-danger">O'chirish</button>
-                                </form>
+                                <a href="{% url 'product-delete-confirm' product.id %}">
+                                    <button type="submit" class="btn btn-danger" data-toggle="modal">O'chirish</button>
+                                </a>
                             </td>
-
                         </tr>
                     {% endfor %}
                     </tbody>

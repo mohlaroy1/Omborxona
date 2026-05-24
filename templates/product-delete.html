@@ -1,0 +1,19 @@
+{% extends 'base.html' %}
+
+{% block title %}Mahsulotlar | O'chirish {% endblock %}
+{% block page_title %}Mahsulotlar{% endblock %}
+{% block products_active %}active{% endblock %}
+
+{% block content %}
+<hr>
+<div class="px-4">
+    <p><b>{{ product.name }}</b> mahsulotini o'chirishni tasdiqlang:</p>
+    <a href="{% url 'products' %}">
+        <button class="btn btn-outline-secondary">Bekor qilish</button>
+    </a>
+    <a href="{% url 'product-delete' product.id %}">
+        <button class="btn btn-outline-danger">O'chirish</button>
+    </a>
+</div>
+
+{% endblock %}

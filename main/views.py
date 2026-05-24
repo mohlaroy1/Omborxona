@@ -67,11 +67,19 @@ class ProductUpdateView(View):
         return redirect('products')
 
 
+class ProductDeleteConfirmView(View):
+    def get(self, request, pk):
+        product = get_object_or_404(Product, id=pk)
+        context = {
+            'product': product,
+        }
+        return render(request, 'product-delete.html', context)
+
+
 class ProductDeleteView(View):
-    def post(self, request, pk):
+    def get(self, request, pk):
         product = get_object_or_404(Product, id=pk)
         product.delete()
-        messages.success(request, "Mahsulot o'chirildi!")
         return redirect('products')
 
 
