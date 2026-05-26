@@ -5,78 +5,146 @@
 {% block client_active %}active{% endblock %}
 
 {% block content %}
-    <div class="col-md-12">
-        <div class="card card-dark">
-            <div class="card-header border-0">
-                <div class="d-flex justify-content-between">
-                    <button type="submit" class="btn btn-primary" data-toggle="modal" data-target="#myModal">Mijoz qo'shish</button>
-                </div>
-            </div>
-            <div class="card-body">
-                <table class="table" style="text-align: center;">
-                    <thead>
-                        <tr>
-                            <th scope="col" style="width: 15px">T/r</th>
-                            <th scope="col" style="width: 255px; text-align: center;">FIO</th>
-                            <th scope="col" style="text-align: center;">Do'kon nomi</th>
-                            <th scope="col" style="text-align: center;">Telefon raqami</th>
-                            <th scope="col" style="text-align: center;">Manzili</th>
-                            <th scope="col" style="text-align: center;"></th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr>
-                            <th scope="row">1.</th>
-                            <td>Ali</td>
-                            <td>Baraka</td>
-                            <td>+998911115555</td>
-                            <td>Farg'ona markazi, Askiya</td>
-                            <td><a href="#"><button type="submit" class="btn btn-danger" data-toggle="modal">Tahrirlash</button></a></td>
-                        </tr>
-                    </tbody>
-                </table>
+<div class="col-md-12">
+    <div class="card card-dark">
+        <div class="card-header border-0">
+            <div class="d-flex justify-content-between">
+                <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#addModal">
+                    Mijoz qo'shish
+                </button>
             </div>
         </div>
-    </div>
+        <div class="card-body">
+            <table class="table" style="text-align: center;">
+                <thead>
+                    <tr>
+                        <th style="width: 15px">T/r</th>
+                        <th>FIO</th>
+                        <th>Do'kon nomi</th>
+                        <th>Telefon raqami</th>
+                        <th>Manzili</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for client in clients %}
+                    <tr>
+                        <th scope="row">{{ forloop.counter }}</th>
+                        <td>{{ client.name }}</td>
+                        <td>{{ client.shop_name }}</td>
+                        <td>{{ client.phone|default:"-" }}</td>
+                        <td>{{ client.address|default:"-" }}</td>
+                        <td>
+                            <!-- Tahrirlash button -->
+                            <button type="button" class="btn btn-warning btn-sm"
+                                data-toggle="modal"
+                                data-target="#editModal{{ client.pk }}">
+                                Tahrirlash
+                            </button>
+                            <!-- O'chirish button -->
+                            <button type="button" class="btn btn-danger btn-sm"
+                                data-toggle="modal"
+                                data-target="#deleteModal{{ client.pk }}">
+                                O'chirish
+                            </button>
+                        </td>
+                    </tr>
 
-    <div class="modal" id="myModal">
-      <div class="modal-dialog">
+                    <!-- Edit Modal -->
+                    <div class="modal fade" id="editModal{{ client.pk }}">
+                        <div class="modal-dialog">
+                            <div class="modal-content">
+                                <div class="modal-header bg-dark">
+                                    <h4 class="modal-title">Mijozni tahrirlash</h4>
+                                    <button type="button" class="close" data-dismiss="modal">&times;</button>
+                                </div>
+                                <form method="POST" action="{% url 'client-update' client.id %}">
+                                    {% csrf_token %}
+                                    <div class="modal-body">
+                                        <label>FIO:</label>
+                                        <input type="text" name="client_name" value="{{ client.name }}" class="form-control" required>
+                                        <br>
+                                        <label>Do'kon nomi:</label>
+                                        <input type="text" name="client_shop" value="{{ client.shop_name }}" class="form-control">
+                                        <br>
+                                        <label>Telefon raqami:</label>
+                                        <input type="text" name="client_phone" value="{% if client.phone %}{{ client.phone }}{% else %}-{% endif %}" class="form-control">
+                                        <br>
+                                        <label>Manzili:</label>
+                                        <input type="text" name="client_address" value="{% if client.address %}{{ client.address }}{% else %}-{% endif %}" class="form-control">
+                                    </div>
+                                    <div class="modal-footer">
+                                        <button type="submit" class="btn btn-success">Saqlash</button>
+                                        <button type="button" class="btn btn-danger" data-dismiss="modal">Yopish</button>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Delete Modal -->
+                    <div class="modal fade" id="deleteModal{{ client.pk }}">
+                        <div class="modal-dialog">
+                            <div class="modal-content">
+                                <div class="modal-header bg-dark">
+                                    <h4 class="modal-title">O'chirishni tasdiqlang</h4>
+                                    <button type="button" class="close" data-dismiss="modal">&times;</button>
+                                </div>
+                                <div class="modal-body">
+                                    <p><strong>{{ client.name }}</strong> mijozini o'chirmoqchimisiz?</p>
+                                </div>
+                                <div class="modal-footer">
+                                    <form method="POST" action="{% url 'client-delete' client.id %}">
+                                        {% csrf_token %}
+                                        <button type="submit" class="btn btn-danger">Tasdiqlash</button>
+                                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Bekor qilish</button>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    {% empty %}
+                    <tr>
+                        <td colspan="6">Mijozlar mavjud emas</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<!-- Add Modal -->
+<div class="modal fade" id="addModal">
+    <div class="modal-dialog">
         <div class="modal-content">
-    
-          <!-- Modal Header -->
-          <div class="modal-header bg-dark">
-            <h4 class="modal-title">Yangi mijoz</h4>
-            <button type="button" class="close" data-dismiss="modal">&times;</button>
-          </div>
-    
-          <!-- Modal body -->
-          <form action="#" id="new-product-form" >
-            <div class="modal-body">
-              <label for="new-product-name">FIO:</label>
-              <input type="text" name="client_name" placeholder="Mijoz to'liq ismi..." id="new-product-name" class="form-control" required>
-                <br>
-              <label for="new-product-name">Do'kon nomi:</label>
-              <input type="text" name="client_shop" placeholder="Do'kon nomi..." id="new-product-brend" class="form-control" required>
-              <br>
-              <label for="new-product-name">Telefon raqami:</label>
-              <input type="text" name="client_phone" placeholder="Telefon raqami..." id="new-product-price" class="form-control" required>
-              <br>
-              <label for="new-product-name">Manzili:</label>
-              <input type="text" name="client_address" placeholder="Mijoz manzili..." id="new-product-amount" class="form-control" required>
-              <br>
+            <div class="modal-header bg-dark">
+                <h4 class="modal-title">Yangi mijoz</h4>
+                <button type="button" class="close" data-dismiss="modal">&times;</button>
             </div>
-    
-          <!-- Modal footer -->
-          <div class="modal-footer">
-            <button type="submit" class="btn btn-success">Qo`shish</button>
-            <button type="button" class="btn btn-danger" data-dismiss="modal">Yopish</button>
+            <form method="POST" action="{% url 'clients' %}">
+                {% csrf_token %}
+                <div class="modal-body">
+                    <label>FIO:</label>
+                    <input type="text" name="client_name" placeholder="Mijoz to'liq ismi..." class="form-control" required>
+                    <br>
+                    <label>Do'kon nomi:</label>
+                    <input type="text" name="client_shop" placeholder="Do'kon nomi..." class="form-control">
+                    <br>
+                    <label>Telefon raqami:</label>
+                    <input type="text" name="client_phone" placeholder="Telefon raqami..." class="form-control">
+                    <br>
+                    <label>Manzili:</label>
+                    <input type="text" name="client_address" placeholder="Mijoz manzili..." class="form-control">
+                </div>
+                <div class="modal-footer">
+                    <button type="submit" class="btn btn-success">Qo'shish</button>
+                    <button type="button" class="btn btn-danger" data-dismiss="modal">Yopish</button>
+                </div>
+            </form>
         </div>
-      </form>
-    
-        </div>
-      </div>
     </div>
-
-<!-- ./wrapper -->
+</div>
 
 {% endblock %}

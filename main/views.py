@@ -83,6 +83,55 @@ class ProductDeleteView(View):
         return redirect('products')
 
 
+from django.shortcuts import render, get_object_or_404, redirect
+from django.views import View
+from .models import Client
+
 class ClientsView(View):
     def get(self, request):
-        return render(request, 'clients.html')
+        clients = Client.objects.all()
+        return render(request, 'clients.html', {'clients': clients})
+
+    def post(self, request):
+        Client.objects.create(
+            name=request.POST.get('client_name'),
+            shop_name=request.POST.get('client_shop'),
+            phone=request.POST.get('client_phone'),
+            address=request.POST.get('client_address'),
+        )
+        return redirect('clients')
+
+
+class ClientUpdateView(View):
+    def post(self, request, pk):
+        client = get_object_or_404(Client, pk=pk)
+        client.name = request.POST.get('client_name')
+        client.shop_name = request.POST.get('client_shop')
+        client.phone = request.POST.get('client_phone')
+        client.address = request.POST.get('client_address')
+        client.save()
+        return redirect('clients')
+
+
+class ClientDeleteView(View):
+    def post(self, request, pk):
+        client = get_object_or_404(Client, pk=pk)
+        client.delete()
+        return redirect('clients')
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
