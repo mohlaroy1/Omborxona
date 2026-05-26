@@ -1,4 +1,4 @@
-from django.shortcuts import render, get_object_or_404
+from django.shortcuts import render, get_object_or_404, redirect
 from django.views import View
 
 from .models import *
@@ -32,7 +32,7 @@ class SalesView(View):
             created_at=request.POST['created_at'],
         )
 
-        return render(request, 'sales.html')
+        return self.get(request)
 
 
 
