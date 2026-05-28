@@ -11,6 +11,9 @@
             <div class="card-header border-0">
                 <div class="d-flex justify-content-between">
                   <button type="submit" class="btn btn-primary" data-toggle="modal" data-target="#myModal">Mahsulot qo'shish</button>
+                    <form>
+                        <input name="q" type="text" class="form-control" placeholder="🔍 Qidirish .." {% if query_search %} value="{{ query_search }}" {% endif %}>
+                    </form>
                 </div>
             </div>
             <div class="card-body">

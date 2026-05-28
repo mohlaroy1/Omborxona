@@ -1,6 +1,6 @@
 from django.contrib import messages
 from django.db.models import ExpressionWrapper, F, FloatField
-from django.shortcuts import render,get_object_or_404,redirect
+from django.db.models import Q
 from django.views import View
 from django.views.generic import RedirectView
 from django.db import transaction
@@ -26,8 +26,15 @@ class ProductsView(View):
             )
         ).order_by('-total_price')
 
+        query_search = request.GET.get('q')
+        if query_search:
+            products = products.filter(
+                Q(name__icontains=query_search) | Q(brand__icontains=query_search)
+            )
+
         context = {
             'products': products,
+            'query_search': query_search,
         }
         return render(request, 'products.html', context)
 
@@ -98,6 +105,7 @@ class ClientsView(View):
             shop_name=request.POST.get('client_shop'),
             phone=request.POST.get('client_phone'),
             address=request.POST.get('client_address'),
+            client_debt=request.POST.get('client_debt')
         )
         return redirect('clients')
 
@@ -109,6 +117,8 @@ class ClientUpdateView(View):
         client.shop_name = request.POST.get('client_shop')
         client.phone = request.POST.get('client_phone')
         client.address = request.POST.get('client_address')
+        client.debt = request.POST.get('client_debt')
+
         client.save()
         return redirect('clients')
 

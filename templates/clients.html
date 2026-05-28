@@ -23,6 +23,7 @@
                         <th>Do'kon nomi</th>
                         <th>Telefon raqami</th>
                         <th>Manzili</th>
+                        <th>Qarz</th>
                         <th></th>
                     </tr>
                 </thead>
@@ -34,6 +35,7 @@
                         <td>{{ client.shop_name }}</td>
                         <td>{{ client.phone|default:"-" }}</td>
                         <td>{{ client.address|default:"-" }}</td>
+                        <td>{{ client.debt|default:"0.0" }}</td>
                         <td>
                             <!-- Tahrirlash button -->
                             <button type="button" class="btn btn-warning btn-sm"
@@ -72,6 +74,9 @@
                                         <br>
                                         <label>Manzili:</label>
                                         <input type="text" name="client_address" value="{% if client.address %}{{ client.address }}{% else %}-{% endif %}" class="form-control">
+                                        <br>
+                                        <label>Qarz:</label>
+                                        <input type="text" name="client_debt" value="{% if client.debt %}{{ client.debt }}{% else %}0.0{% endif %}" class="form-control">
                                     </div>
                                     <div class="modal-footer">
                                         <button type="submit" class="btn btn-success">Saqlash</button>
