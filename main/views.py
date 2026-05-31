@@ -23,7 +23,9 @@ class SectionsView(LoginRequiredMixin, View):
 class ProductsView(View):
     def get(self, request):
         if request.user.is_authenticated:
-            products = Product.objects.annotate(
+            products = Product.objects.filter(
+                branch=request.user.branch,
+            ).annotate(
                 total_price=ExpressionWrapper(
                     F('price') * F('amount'),
                     output_field=FloatField()
@@ -52,6 +54,7 @@ class ProductsView(View):
                 price=request.POST.get('price'),
                 amount=request.POST.get('amount'),
                 unit=request.POST.get('unit'),
+                branch = request.user.branch,
             )
             return self.get(request)
         return redirect('login')
@@ -59,7 +62,7 @@ class ProductsView(View):
 
 class ProductUpdateView(View):
     def get(self, request, pk):
-        product = get_object_or_404(Product, id=pk)
+        product = get_object_or_404(Product, id=pk, branch=request.user.branch)
 
         context = {
             'product': product,
@@ -67,13 +70,14 @@ class ProductUpdateView(View):
         return render(request, 'product-update.html', context)
 
     def post(self, request, pk):
-        product = get_object_or_404(Product, id=pk)
+        product = get_object_or_404(Product, id=pk, branch=request.user.branch)
         try:
             product.name = request.POST.get('name')
             product.brand = request.POST.get('brand')
             product.price = request.POST.get('price')
             product.amount = request.POST.get('amount')
             product.unit = request.POST.get('unit')
+            product.branch = request.user.branch
             product.save()
             messages.success(request, 'Ma\'lumotlar muvaffaqiyatli saqlandi!')
         except Exception as e:
@@ -83,7 +87,7 @@ class ProductUpdateView(View):
 
 class ProductDeleteConfirmView(View):
     def get(self, request, pk):
-        product = get_object_or_404(Product, id=pk)
+        product = get_object_or_404(Product, id=pk, branch=request.user.branch)
         context = {
             'product': product,
         }
@@ -92,7 +96,7 @@ class ProductDeleteConfirmView(View):
 
 class ProductDeleteView(View):
     def get(self, request, pk):
-        product = get_object_or_404(Product, id=pk)
+        product = get_object_or_404(Product, id=pk, branch=request.user.branch)
         product.delete()
         return redirect('products')
 
