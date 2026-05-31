@@ -3,6 +3,7 @@ from django.db.models import ExpressionWrapper, F, FloatField
 from django.db.models import Q
 from django.views import View
 from django.views.generic import RedirectView
+from django.contrib.auth.mixins import LoginRequiredMixin
 from django.db import transaction
 
 from .models import *
@@ -12,42 +13,48 @@ class IndexView(RedirectView):
     url = 'sections'
 
 
-class SectionsView(View):
+class SectionsView(LoginRequiredMixin, View):
+    login_url = 'login'
+
     def get(self, request):
         return render(request, 'sections.html')
 
 
 class ProductsView(View):
     def get(self, request):
-        products = Product.objects.annotate(
-            total_price=ExpressionWrapper(
-                F('price') * F('amount'),
-                output_field=FloatField()
-            )
-        ).order_by('-total_price')
+        if request.user.is_authenticated:
+            products = Product.objects.annotate(
+                total_price=ExpressionWrapper(
+                    F('price') * F('amount'),
+                    output_field=FloatField()
+                )
+            ).order_by('-total_price')
 
-        query_search = request.GET.get('q')
-        if query_search:
-            products = products.filter(
-                Q(name__icontains=query_search) | Q(brand__icontains=query_search)
-            )
+            query_search = request.GET.get('q')
+            if query_search:
+                products = products.filter(
+                    Q(name__icontains=query_search) | Q(brand__icontains=query_search)
+                )
 
-        context = {
-            'products': products,
-            'query_search': query_search,
-        }
-        return render(request, 'products.html', context)
+            context = {
+                'products': products,
+                'query_search': query_search,
+            }
+            return render(request, 'products.html', context)
+        return redirect('login')
 
 
     def post(self, request):
-        Product.objects.create(
-            name = request.POST.get('name'),
-            brand = request.POST.get('brand'),
-            price = request.POST.get('price'),
-            amount = request.POST.get('amount'),
-            unit = request.POST.get('unit'),
-        )
-        return self.get(request)
+        if request.user.is_authenticated:
+            Product.objects.create(
+                name=request.POST.get('name'),
+                brand=request.POST.get('brand'),
+                price=request.POST.get('price'),
+                amount=request.POST.get('amount'),
+                unit=request.POST.get('unit'),
+            )
+            return self.get(request)
+        return redirect('login')
 
 
 class ProductUpdateView(View):
