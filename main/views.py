@@ -118,7 +118,7 @@ class ClientsView(LoginRequiredMixin, View):
             shop_name=request.POST.get('client_shop'),
             phone=request.POST.get('client_phone'),
             address=request.POST.get('client_address'),
-            client_debt=request.POST.get('client_debt'),
+            debt=request.POST.get('client_debt') or 0,
             branch=request.user.branch,
 
         )

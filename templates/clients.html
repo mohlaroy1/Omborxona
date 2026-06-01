@@ -32,7 +32,7 @@
                     <tr>
                         <th scope="row">{{ forloop.counter }}</th>
                         <td>{{ client.name }}</td>
-                        <td>{{ client.shop_name }}</td>
+                        <td>{{ client.shop_name|default:"-" }}</td>
                         <td>{{ client.phone|default:"-" }}</td>
                         <td>{{ client.address|default:"-" }}</td>
                         <td>{{ client.debt|default:"0.0" }}</td>
@@ -67,7 +67,7 @@
                                         <input type="text" name="client_name" value="{{ client.name }}" class="form-control" required>
                                         <br>
                                         <label>Do'kon nomi:</label>
-                                        <input type="text" name="client_shop" value="{{ client.shop_name }}" class="form-control">
+                                        <input type="text" name="client_shop" value="{% if client.shop_name %}{{ client.shop_name }}{% else %}-{% endif %}" class="form-control">
                                         <br>
                                         <label>Telefon raqami:</label>
                                         <input type="text" name="client_phone" value="{% if client.phone %}{{ client.phone }}{% else %}-{% endif %}" class="form-control">
