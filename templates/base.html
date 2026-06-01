@@ -58,7 +58,7 @@
     <!-- Brand Logo -->
     <a href="../index.html" class="brand-link">
       <img src="/static/dist/img/AdminLTELogo.png" alt="AdminLTE Logo" class="brand-image img-circle elevation-3" style="opacity: .8">
-      <span class="brand-text font-weight-light">Arzonchi Admin</span>
+      <span class="brand-text font-weight-light">{% if request.user.branch %} {{ request.user.branch.name }} {% else %} Arzonchi Admin {% endif %}</span>
     </a>
 
     <!-- Sidebar -->
