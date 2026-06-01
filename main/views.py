@@ -60,7 +60,8 @@ class ProductsView(View):
         return redirect('login')
 
 
-class ProductUpdateView(View):
+class ProductUpdateView(LoginRequiredMixin, View):
+    login_url = 'login'
     def get(self, request, pk):
         product = get_object_or_404(Product, id=pk, branch=request.user.branch)
 
@@ -85,7 +86,7 @@ class ProductUpdateView(View):
         return redirect('products')
 
 
-class ProductDeleteConfirmView(View):
+class ProductDeleteConfirmView(LoginRequiredMixin, View):
     def get(self, request, pk):
         product = get_object_or_404(Product, id=pk, branch=request.user.branch)
         context = {
@@ -94,7 +95,7 @@ class ProductDeleteConfirmView(View):
         return render(request, 'product-delete.html', context)
 
 
-class ProductDeleteView(View):
+class ProductDeleteView(LoginRequiredMixin, View):
     def get(self, request, pk):
         product = get_object_or_404(Product, id=pk, branch=request.user.branch)
         product.delete()
@@ -105,9 +106,10 @@ from django.shortcuts import render, get_object_or_404, redirect
 from django.views import View
 from .models import Client
 
-class ClientsView(View):
+class ClientsView(LoginRequiredMixin, View):
+    login_url = 'login'
     def get(self, request):
-        clients = Client.objects.all()
+        clients = Client.objects.filter(branch=request.user.branch)
         return render(request, 'clients.html', {'clients': clients})
 
     def post(self, request):
@@ -116,14 +118,18 @@ class ClientsView(View):
             shop_name=request.POST.get('client_shop'),
             phone=request.POST.get('client_phone'),
             address=request.POST.get('client_address'),
-            client_debt=request.POST.get('client_debt')
+            client_debt=request.POST.get('client_debt'),
+            branch=request.user.branch,
+
         )
         return redirect('clients')
 
 
-class ClientUpdateView(View):
+class ClientUpdateView(LoginRequiredMixin, View):
+    login_url = 'login'
     def post(self, request, pk):
-        client = get_object_or_404(Client, pk=pk)
+        client = get_object_or_404(Client, pk=pk, branch=request.user.branch)
+        client.name = request.POST.get('client_name')
         client.name = request.POST.get('client_name')
         client.shop_name = request.POST.get('client_shop')
         client.phone = request.POST.get('client_phone')
@@ -134,9 +140,10 @@ class ClientUpdateView(View):
         return redirect('clients')
 
 
-class ClientDeleteView(View):
+class ClientDeleteView(LoginRequiredMixin, View):
+    login_url = 'login'
     def post(self, request, pk):
-        client = get_object_or_404(Client, pk=pk)
+        client = get_object_or_404(Client, pk=pk, branch=request.user.branch)
         client.delete()
         return redirect('clients')
 
