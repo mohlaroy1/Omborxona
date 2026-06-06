@@ -6,6 +6,8 @@
 
 {% block content %}
 
+{% load humanize %}
+
     <div class="col-md-12">
         <div class="card card-dark">
             <div class="card-header border-0">
@@ -21,29 +23,32 @@
                     <thead>
                         <tr>
                             <th scope="col" style="width: 15px">T/r</th>
-                            <th scope="col" style="width: 255px; text-align: center;">Nomi</th>
+                            <th scope="col" style="width: 255px; text-align: center;">Mahsulot</th>
                             <th scope="col" style="text-align: center;">Miqdor</th>
-                            <th scope="col" style="text-align: center;">Sotib olish narxi</th>
-                            <th scope="col" style="text-align: center;">Sotish narxi</th>
+                            <th scope="col" style="text-align: center;">Sotib olish</th>
+                            <th scope="col" style="text-align: center;">Sotish</th>
+                            <th scope="col" style="text-align: center;">Jami</th>
                             <th scope="col" style="text-align: center;">Izoh</th>
                             <th scope="col" style="text-align: center;">Sana</th>
                             <th scope="col" style="text-align: center;"></th>
                         </tr>
                     </thead>
                     <tbody>
-                    {% for product in products %}
+                    {% for i in import_products %}
                         <tr>
                             <th scope="row">{{ forloop.counter }}</th>
-                            <td>{{ product.name }}</td>
-                            <td>{% if product.brand %}{{ product.brand }}{% else %}-{% endif %}</td>
-                            <td>{{ product.price }}</td>
-                            <td>{{ product.amount }} {{ product.unit }}</td>
-                            <td>{{ product.updated_at }}</td>
+                            <td>{{ i.product.name }}</td>
+                            <td>{{ i.amount }} {{ i.product.unit }}</td>
+                            <td>{{ i.buy_price|intcomma }} so'm</td>
+                            <td>{{ i.sell_price|intcomma }} so'm</td>
+                            <td>{{ i.total_price|intcomma }} so'm</td>
+                            <td>{{ i.description }} so'm</td>
+                            <td>{{ i.created_at|date:"d.m.Y H:i" }}</td>
                             <td>
-                                <a href="{% url 'product-update' product.id %}">
+                                <a href="#">
                                     <button type="submit" class="btn btn-warning" data-toggle="modal">Tahrirlash</button>
                                 </a>
-                                <a href="{% url 'product-delete-confirm' product.id %}">
+                                <a href="#">
                                     <button type="submit" class="btn btn-danger" data-toggle="modal">O'chirish</button>
                                 </a>
                             </td>
@@ -62,7 +67,7 @@
     
           <!-- Modal Header -->
           <div class="modal-header bg-dark">
-            <h4 class="modal-title">Yangi mahsulot</h4>
+            <h4 class="modal-title">Yangi kirim</h4>
             <button type="button" class="close" data-dismiss="modal">&times;</button>
           </div>
     
@@ -70,20 +75,29 @@
           <form id="new-product-form" method="post">
               {% csrf_token %}
             <div class="modal-body">
-              <label for="name">Nomi:</label>
-              <input type="text" name="name" placeholder="Nomi..." id="name" class="form-control" required>
-              <br>
-              <label for="brand">Brend:</label>
-              <input type="text" name="brand" placeholder="Mahsulot brendi..." id="brand" class="form-control">
-              <br>
-              <label for="price">Sotish narxi:</label>
-              <input type="number" name="price" placeholder="Mahsulot narxi..." id="price" class="form-control" required>
+                <label for="product">Mahsulot:</label>
+                <select class="form-control" name="product_id" id="product">
+                    {% for product in products %}
+                        <option class="form-control" value="{{ product.id }}">{{ product.name }} ({{ product.amount }} {{ product.unit }}) -- {{ product.price }} so'm</option>
+                    {% endfor %}
+                </select>
               <br>
               <label for="amount">Miqdori:</label>
               <input type="number" name="amount" value="0" placeholder="Mahsulot miqdori..." id="amount" class="form-control">
               <br>
-              <label for="unit">O'lchov birlik:</label>
-              <input type="text" name="unit" value="dona" placeholder="Mahsulot o'lchovi (kg, dona, litr...)" id="unit" class="form-control" required>
+              <label for="buy_price">Sotib olish(so'm):</label>
+              <input type="number" name="buy_price" placeholder="Sotib olish narxi (1 birlik)..." id="buy_price" class="form-control">
+              <br>
+              <label for="sell_price">Sotish(so'm):</label>
+              <input type="number" name="sell_price" placeholder="Sotish narxi (1 birlik)..." id="sell_price" class="form-control">
+              <br>
+              <label for="total_price">Jami(so'm):</label>
+              <input type="number" name="total_price" placeholder="Jami narxi..." id="total_price" class="form-control" required>
+              <br>
+              <label for="description">Izoh:</label>
+              <input type="text" name="description" id="description" class="form-control">
+
+
               <br>
             </div>
     

@@ -6,6 +6,8 @@
 
 {% block content %}
 
+{% load humanize %}
+
 {% if messages %}
 <div class="m-4 p-3 border rounded-2 border-danger">
         {% for message in messages %}
@@ -42,10 +44,10 @@
                             <td>{{ sale.product.name }} -- {{ sale.product.brand }}</td>
                             <td>{{ sale.client.name }} {% if sale.client.shop_name %} -- {{ sale.client.shop_name }} {% endif %}</td>
                             <td>{{ sale.amount }} {{ sale.product.unit }}</td>
-                            <td>{{ sale.total_price }} so'm</td>
-                            <td>{{ sale.paid_price }} so'm</td>
-                            <td>{{ sale.debt_price }} so'm</td>
-                            <td>{{ sale.created_at|date:"d.m.Y" }}</td>
+                            <td>{{ sale.total_price|intcomma }} so'm</td>
+                            <td>{{ sale.paid_price|intcomma }} so'm</td>
+                            <td>{{ sale.debt_price|intcomma }} so'm</td>
+                            <td>{{ sale.created_at|date:"d.m.Y H:i" }}</td>
                             <td>
                                 <a href="#">
                                     <button type="submit" class="btn btn-warning" data-toggle="modal">Tahrirlash</button>

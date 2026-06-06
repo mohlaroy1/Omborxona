@@ -5,6 +5,7 @@
 {% block products_active %}active{% endblock %}
 
 {% block content %}
+{% load humanize %}
 
     <div class="col-md-12">
         <div class="card card-dark">
@@ -35,7 +36,7 @@
                             <th scope="row">{{ forloop.counter }}</th>
                             <td>{{ product.name }}</td>
                             <td>{% if product.brand %}{{ product.brand }}{% else %}-{% endif %}</td>
-                            <td>{{ product.price }}</td>
+                            <td>{{ product.price|intcomma }}</td>
                             <td>{{ product.amount }} {{ product.unit }}</td>
                             <td>{{ product.updated_at }}</td>
                             <td>

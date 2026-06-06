@@ -1,3 +1,4 @@
+from django.contrib.auth.mixins import LoginRequiredMixin
 from django.shortcuts import render, get_object_or_404, redirect
 from django.db.models import Q
 from django.views import View
@@ -70,4 +71,35 @@ class SalesView(View):
 
 
 
+class ImportProductsView(LoginRequiredMixin, View):
+    def get(self, request):
+        import_products = ImportProduct.objects.filter(branch=request.user.branch)
+        products = Product.objects.filter(branch=request.user.branch)
+        context = {
+            'import_products':import_products,
+            'products':products,
+        }
+        return render(request, 'import-products.html', context)
 
+    def post(self, request):
+        product = get_object_or_404(Product, id=request.POST['product_id'], branch=request.user.branch)
+        i = ImportProduct.objects.create(
+            product=product,
+            buy_price=float(request.POST.get('buy_price')),
+            sell_price=request.POST.get('sell_price') if request.POST.get('sell_price') else None,
+            amount=request.POST.get('amount') if request.POST.get('amount') else None,
+            total_price=float(request.POST.get('total_price')),
+            description=request.POST.get('description'),
+            branch=request.user.branch,
+            user=request.user,
+        )
+        product.amount += i.amount
+        if i.sell_price:
+            product.price = i.sell_price
+        product.save()
+
+        if not i.total_price:
+            i.total_price = i.buy_price * i.amount
+            i.save()
+
+        return redirect('import-products')
