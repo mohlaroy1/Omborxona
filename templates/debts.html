@@ -1,0 +1,175 @@
+{% extends 'base.html' %}
+{% load humanize %}
+
+{% block title %}To'langan qarzlar{% endblock %}
+{% block page_title %}To'langan qarzlar{% endblock %}
+{% block debt_active %}active{% endblock %}
+
+{% block content %}
+<div class="col-md-12">
+  <div class="card card-dark">
+    <div class="card-header border-0">
+      <div class="d-flex justify-content-between">
+        <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#addModal">
+          To'lov qo'shish
+        </button>
+        <form method="get">
+          <input name="q" type="text" class="form-control" placeholder="🔍 Qidirish .."
+            {% if request.GET.q %}value="{{ request.GET.q }}"{% endif %}>
+        </form>
+      </div>
+    </div>
+
+    <div class="card-body">
+      <table class="table" style="text-align:center;">
+        <thead>
+          <tr>
+            <th style="width:15px;">T/r</th>
+            <th style="text-align:center;">Mijoz</th>
+            <th style="text-align:center;">To'langan miqdor</th>
+            <th style="text-align:center;">Izoh</th>
+            <th style="text-align:center;">Foydalanuvchi</th>
+            <th style="text-align:center;">Sana</th>
+            <th style="text-align:center;"></th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for debt in debts %}
+          <tr>
+            <th scope="row">{{ forloop.counter }}</th>
+            <td>{{ debt.client.name }}</td>
+            <td>{{ debt.amount|intcomma }} so'm</td>
+            <td>{{ debt.description|default:"-" }}</td>
+            <td>
+              {% if debt.user %}
+                {{ debt.user.get_full_name|default:debt.user.username }}
+              {% else %}—{% endif %}
+            </td>
+            <td>{{ debt.created_at|date:"d.m.Y H:i" }}</td>
+            <td>
+              <button type="button" class="btn btn-warning btn-sm"
+                data-toggle="modal"
+                data-target="#editModal{{ debt.pk }}">
+                Tahrirlash
+              </button>
+              <button type="button" class="btn btn-danger btn-sm"
+                data-toggle="modal"
+                data-target="#deleteModal{{ debt.pk }}">
+                O'chirish
+              </button>
+            </td>
+          </tr>
+
+          <!-- Edit Modal -->
+          <div class="modal fade" id="editModal{{ debt.pk }}">
+            <div class="modal-dialog">
+              <div class="modal-content">
+                <div class="modal-header bg-dark">
+                  <h4 class="modal-title">To'lovni tahrirlash</h4>
+                  <button type="button" class="close" data-dismiss="modal">&times;</button>
+                </div>
+                <form method="post">
+                  {% csrf_token %}
+                  <input type="hidden" name="action" value="edit">
+                  <input type="hidden" name="debt_id" value="{{ debt.pk }}">
+                  <div class="modal-body">
+                    <label>Mijoz:</label>
+                    <select name="client" class="form-control" required>
+                      {% for client in clients %}
+                      <option value="{{ client.id }}"
+                        {% if client.id == debt.client.id %}selected{% endif %}>
+                        {{ client.name }}
+                      </option>
+                      {% endfor %}
+                    </select>
+                    <br>
+                    <label>To'langan miqdor (so'm):</label>
+                    <input type="number" name="amount" value="{{ debt.amount }}"
+                      class="form-control" step="0.01" min="0" required>
+                    <br>
+                    <label>Izoh:</label>
+                    <textarea name="description" class="form-control" rows="2">{{ debt.description|default:'' }}</textarea>
+                  </div>
+                  <div class="modal-footer">
+                    <button type="submit" class="btn btn-success">Saqlash</button>
+                    <button type="button" class="btn btn-danger" data-dismiss="modal">Yopish</button>
+                  </div>
+                </form>
+              </div>
+            </div>
+          </div>
+
+          <!-- Delete Modal -->
+          <div class="modal fade" id="deleteModal{{ debt.pk }}">
+            <div class="modal-dialog">
+              <div class="modal-content">
+                <div class="modal-header bg-dark">
+                  <h4 class="modal-title">O'chirishni tasdiqlang</h4>
+                  <button type="button" class="close" data-dismiss="modal">&times;</button>
+                </div>
+                <div class="modal-body">
+                  <p><strong>{{ debt.client.name }}</strong> mijozining <strong>{{ debt.amount|intcomma }} so'm</strong> to'lovini o'chirmoqchimisiz?</p>
+                </div>
+                <div class="modal-footer">
+                  <form method="post">
+                    {% csrf_token %}
+                    <input type="hidden" name="action" value="delete">
+                    <input type="hidden" name="debt_id" value="{{ debt.pk }}">
+                    <button type="submit" class="btn btn-danger">Tasdiqlash</button>
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Bekor qilish</button>
+                  </form>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {% empty %}
+          <tr>
+            <td colspan="7" class="text-center text-muted py-4">
+              <i class="fas fa-inbox fa-2x mb-2 d-block"></i>
+              Hech qanday yozuv topilmadi
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- Add Modal -->
+<div class="modal fade" id="addModal">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header bg-dark">
+        <h4 class="modal-title">Yangi to'lov</h4>
+        <button type="button" class="close" data-dismiss="modal">&times;</button>
+      </div>
+      <form method="post">
+        {% csrf_token %}
+        <input type="hidden" name="action" value="add">
+        <div class="modal-body">
+          <label>Mijoz:</label>
+          <select name="client" class="form-control" required>
+            <option value="">-- Mijozni tanlang --</option>
+            {% for client in clients %}
+            <option value="{{ client.id }}">{{ client.name }}</option>
+            {% endfor %}
+          </select>
+          <br>
+          <label>To'langan miqdor (so'm):</label>
+          <input type="number" name="amount" class="form-control" step="0.01" min="0" placeholder="0.00" required>
+          <br>
+          <label>Izoh:</label>
+          <textarea name="description" class="form-control" rows="2" placeholder="Ixtiyoriy izoh ..."></textarea>
+        </div>
+        <div class="modal-footer">
+          <button type="submit" class="btn btn-success">Qo'shish</button>
+          <button type="button" class="btn btn-danger" data-dismiss="modal">Yopish</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+{% endblock %}

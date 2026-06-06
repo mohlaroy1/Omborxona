@@ -1,6 +1,6 @@
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.shortcuts import render, get_object_or_404, redirect
-from django.db.models import Q
+from django.db.models import Q, Sum
 from django.views import View
 from django.contrib import messages
 
@@ -103,3 +103,70 @@ class ImportProductsView(LoginRequiredMixin, View):
             i.save()
 
         return redirect('import-products')
+
+
+class DebtsView(View):
+    template_name = 'debts.html'
+
+    def get_queryset(self, request):
+        qs = PayDebt.objects.select_related('client', 'user').filter(
+            branch=request.user.branch
+        )
+        q = request.GET.get('q', '').strip()
+        if q:
+            qs = qs.filter(
+                Q(client__name__icontains=q) |
+                Q(description__icontains=q)
+            )
+        return qs
+
+    def get(self, request):
+        qs = self.get_queryset(request)
+        context = {
+            'debts':         qs,
+            'clients':       Client.objects.filter(branch=request.user.branch),
+            'total_amount':  qs.aggregate(s=Sum('amount'))['s'] or 0,
+            'total_count':   qs.count(),
+            'clients_count': qs.values('client').distinct().count(),
+        }
+        return render(request, self.template_name, context)
+
+    def post(self, request):
+        action = request.POST.get('action')
+
+        if action == 'add':
+            client = get_object_or_404(Client, id=request.POST.get('client'), branch=request.user.branch)
+            amount = float(request.POST.get('amount'))
+            client.debt -= amount
+            client.save()
+            PayDebt.objects.create(
+                client=client,
+                amount=amount,
+                description=request.POST.get('description', ''),
+                branch=request.user.branch,
+                user=request.user,
+            )
+            messages.success(request, "To'lov muvaffaqiyatli qo'shildi.")
+
+        elif action == 'edit':
+            debt = get_object_or_404(PayDebt, id=request.POST.get('debt_id'), branch=request.user.branch)
+            client = debt.client
+            new_amount = float(request.POST.get('amount', debt.amount))
+            client.debt += debt.amount
+            client.debt -= new_amount
+            client.save()
+            debt.client      = get_object_or_404(Client, id=request.POST.get('client'), branch=request.user.branch)
+            debt.amount      = new_amount
+            debt.description = request.POST.get('description', debt.description)
+            debt.save()
+            messages.success(request, "To'lov muvaffaqiyatli yangilandi.")
+
+        elif action == 'delete':
+            debt = get_object_or_404(PayDebt, id=request.POST.get('debt_id'), branch=request.user.branch)
+            client = debt.client
+            client.debt += debt.amount
+            client.save()
+            debt.delete()
+            messages.success(request, "To'lov o'chirildi.")
+
+        return redirect('debts')
